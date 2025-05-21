@@ -5,11 +5,13 @@ function MenuDashboard({ restaurantId }) {
     const token = localStorage.getItem("token");
   const [menuItems, setMenuItems] = useState([]);
   const [form, setForm] = useState({
-    dishName: "",
-    description: "",
-    price: "",
-    available: true,
-  });
+  dishName: "",
+  description: "",
+  price: "",
+  available: true,
+  image: null,
+});
+
 
   const fetchMenu = async () => {
     try {
@@ -29,20 +31,28 @@ function MenuDashboard({ restaurantId }) {
     fetchMenu();
   }, []);
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
+  const formData = new FormData();
+  formData.append("dishName", form.dishName);
+  formData.append("description", form.description);
+  formData.append("price", form.price);
+  formData.append("available", form.available);
+  formData.append("image", form.image);
+
   try {
     await axios.post(
       `http://localhost:8081/api/menu/add/${restaurantId}`,
-      form,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
         withCredentials: true,
       }
     );
-    setForm({ dishName: "", description: "", price: "", available: true });
+    setForm({ dishName: "", description: "", price: "", available: true, image: null });
     fetchMenu();
   } catch (err) {
     console.error("Add menu failed", err);
@@ -100,6 +110,14 @@ function MenuDashboard({ restaurantId }) {
               required
             />
           </div>
+          <input
+  type="file"
+  accept="image/*"
+  className="form-control"
+  onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+  required
+/>
+
           <div className="col-md-2">
             <button type="submit" className="btn btn-success w-100">
               Add Dish
@@ -114,6 +132,7 @@ function MenuDashboard({ restaurantId }) {
             <th>Dish</th>
             <th>Description</th>
             <th>Price</th>
+            <th>Image</th>
             <th>Available</th>
             <th>Actions</th>
           </tr>
@@ -124,6 +143,20 @@ function MenuDashboard({ restaurantId }) {
               <td>{item.dishName}</td>
               <td>{item.description}</td>
               <td>₹{item.price}</td>
+              <td>
+  {item.imagePath ? (
+    <img
+  src={`http://localhost:8081/menu-images/${item.imagePath}`}
+  alt="Dish"
+  width="200"
+/>
+
+  ) : (
+    "No image"
+  )}
+</td>
+
+
               <td>{item.available ? "Yes" : "No"}</td>
               <td>
                 <button

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getUsersWithRestaurants } from "../services/adminService";
+import axios from "axios";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -19,6 +20,28 @@ function AdminDashboard() {
         setUsers([]);
       });
   }, []);
+
+ const handleApprove = async (userId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.put(
+      `http://localhost:8081/api/auth/admin/approve/${userId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    alert("Restaurant approved!");
+    window.location.reload();
+  } catch (err) {
+    console.error("Approval error:", err);  // ✅ log it
+    alert("Failed to approve.");
+  }
+};
+
+
 
   const customers = users.filter((u) => u.role === "CUSTOMER");
   const restaurants = users.filter((u) => u.role === "RESTAURANT");
@@ -61,6 +84,7 @@ function AdminDashboard() {
             <th>Contact</th>
             <th>License ID</th>
             <th>Status</th>
+            <th>Button</th>
           </tr>
         </thead>
         <tbody>
@@ -73,6 +97,19 @@ function AdminDashboard() {
                 <td>{r.restaurant?.contactNumber || "—"}</td>
                 <td>{r.restaurant?.licenseId || "—"}</td>
                 <td>{r.restaurant?.status || "—"}</td>
+                <td>
+  {r.restaurant?.status === "INACTIVE" ? (
+    <button
+      className="btn btn-success btn-sm"
+      onClick={() => handleApprove(r.userId)}
+    >
+      Approve
+    </button>
+  ) : (
+    r.restaurant?.status || "—"
+  )}
+</td>
+
               </tr>
             ))
           ) : (
