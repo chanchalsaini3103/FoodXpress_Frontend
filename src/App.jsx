@@ -19,6 +19,7 @@ function App() {
 <Route path="/customer-dashboard" element={<CustomerDashboard />} />
 <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
 <Route path="/restaurant-complete-profile" element={<CompleteProfile />} />
+
     </Routes>
   );
 }
